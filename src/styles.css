@@ -1,0 +1,151 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-kp-blue: var(--kp-blue);
+  --color-kp-red: var(--kp-red);
+  --color-surface: var(--surface);
+  --color-text-secondary: var(--text-secondary);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --radius: 0.75rem;
+  --kp-blue: #0a1f44;
+  --kp-red: #8b0000;
+  --background: #ffffff;
+  --foreground: #0d1b2a;
+  --surface: #f4f6f9;
+  --text-secondary: #5a6478;
+  --card: #ffffff;
+  --card-foreground: #0d1b2a;
+  --popover: #ffffff;
+  --popover-foreground: #0d1b2a;
+  --primary: #0a1f44;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f6f9;
+  --secondary-foreground: #0a1f44;
+  --muted: #f4f6f9;
+  --muted-foreground: #5a6478;
+  --accent: #f4f6f9;
+  --accent-foreground: #0a1f44;
+  --destructive: #c0392b;
+  --destructive-foreground: #ffffff;
+  --border: #e0e4ed;
+  --input: #e0e4ed;
+  --ring: #0a1f44;
+  --success: #1a7a4a;
+  --warning: #c47d00;
+  --danger: #c0392b;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    color: var(--kp-blue);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+}
+
+@utility card-surface {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(10, 31, 68, 0.06);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+@utility card-hover {
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(10, 31, 68, 0.10);
+  }
+}
+@utility btn-primary {
+  background: var(--kp-blue);
+  color: #fff;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 150ms ease;
+  &:hover { background: #061533; }
+}
+@utility btn-danger {
+  background: var(--kp-red);
+  color: #fff;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  &:hover { background: #6b0000; }
+}
+@utility btn-ghost {
+  background: transparent;
+  color: var(--kp-blue);
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+  &:hover { background: var(--color-surface); }
+}
+@utility page-fade {
+  animation: pageFade 240ms ease-out;
+}
+
+@keyframes pageFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #eef1f6 0%, #f6f8fb 50%, #eef1f6 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
