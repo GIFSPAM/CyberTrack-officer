@@ -2,6 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import logo from "@/assets/kerala-police-logo.png";
 import { Shield, Lock, User } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -11,15 +12,32 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === "CCPSP" && password === "123456") {
-      localStorage.setItem("auth", "true");
-      router.navigate({ to: "/cases" });
-    } else {
-      setError("Invalid username or password");
+    setLoading(true);
+    setError("");
+    
+    try {
+      const { data, error: sbError } = await supabase
+        .from("officers")
+        .select("*")
+        .eq("username", username)
+        .eq("password", password)
+        .single();
+        
+      if (data) {
+        localStorage.setItem("auth", "true");
+        router.navigate({ to: "/cases" });
+      } else {
+        setError("Invalid username or password");
+      }
+    } catch (err) {
+      setError("Unable to connect to authentication server.");
+    } finally {
+      setLoading(false);
     }
   };
 
