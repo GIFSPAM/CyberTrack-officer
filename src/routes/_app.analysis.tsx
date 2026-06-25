@@ -79,7 +79,8 @@ function Analysis() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [cat, setCat] = useState("");
-  const [moneyLossFilter, setMoneyLossFilter] = useState("");
+  const [minLoss, setMinLoss] = useState("");
+  const [maxLoss, setMaxLoss] = useState("");
   const reportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
@@ -101,13 +102,11 @@ function Analysis() {
       const t = new Date(i.created_at).getTime();
       if (t < range.start.getTime() || t > range.end.getTime()) return false;
       if (cat && String(i.category_id) !== cat) return false;
-      if (moneyLossFilter === "low" && (i.money_lost === null || i.money_lost >= 10000)) return false;
-      if (moneyLossFilter === "mid" && (i.money_lost === null || i.money_lost < 10000 || i.money_lost >= 50000)) return false;
-      if (moneyLossFilter === "high" && (i.money_lost === null || i.money_lost < 50000 || i.money_lost >= 100000)) return false;
-      if (moneyLossFilter === "severe" && (i.money_lost === null || i.money_lost < 100000)) return false;
+      if (minLoss && (i.money_lost === null || i.money_lost < Number(minLoss))) return false;
+      if (maxLoss && (i.money_lost === null || i.money_lost > Number(maxLoss))) return false;
       return true;
     });
-  }, [data, range, cat, moneyLossFilter]);
+  }, [data, range, cat, minLoss, maxLoss]);
 
   const prevPeriod = useMemo(() => {
     const span = range.end.getTime() - range.start.getTime();
@@ -116,13 +115,11 @@ function Analysis() {
       const t = new Date(i.created_at).getTime();
       if (t < pStart.getTime() || t >= range.start.getTime()) return false;
       if (cat && String(i.category_id) !== cat) return false;
-      if (moneyLossFilter === "low" && (i.money_lost === null || i.money_lost >= 10000)) return false;
-      if (moneyLossFilter === "mid" && (i.money_lost === null || i.money_lost < 10000 || i.money_lost >= 50000)) return false;
-      if (moneyLossFilter === "high" && (i.money_lost === null || i.money_lost < 50000 || i.money_lost >= 100000)) return false;
-      if (moneyLossFilter === "severe" && (i.money_lost === null || i.money_lost < 100000)) return false;
+      if (minLoss && (i.money_lost === null || i.money_lost < Number(minLoss))) return false;
+      if (maxLoss && (i.money_lost === null || i.money_lost > Number(maxLoss))) return false;
       return true;
     });
-  }, [data, range, cat, moneyLossFilter]);
+  }, [data, range, cat, minLoss, maxLoss]);
 
   const stats = useMemo(() => {
     const total = filtered.length;
@@ -217,7 +214,6 @@ function Analysis() {
     { k: "week", label: "This Week" },
     { k: "month", label: "This Month" },
     { k: "year", label: "This Year" },
-    { k: "custom", label: "Custom Range" },
   ];
 
   const trendIcon = stats.pctChange > 5
@@ -286,15 +282,13 @@ function Analysis() {
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
-          <select value={moneyLossFilter} onChange={(e) => setMoneyLossFilter(e.target.value)} className="px-3 py-1.5 text-[12px] border border-[#e0e4ed] rounded-md focus:outline-none focus:border-[#0a1f44] bg-white">
-            <option value="">Any Amount</option>
-            <option value="low">&lt; ₹10,000</option>
-            <option value="mid">₹10K - ₹50K</option>
-            <option value="high">₹50K - ₹1L</option>
-            <option value="severe">&gt; ₹1L</option>
-          </select>
-          {(from || to || cat || moneyLossFilter) && (
-            <button onClick={() => { setFrom(""); setTo(""); setCat(""); setMoneyLossFilter(""); setPreset("month"); }} className="text-[11px] text-[#8b0000] hover:underline">
+          <div className="flex items-center gap-1">
+            <input type="number" placeholder="Min ₹" value={minLoss} onChange={(e) => setMinLoss(e.target.value)} className="w-20 px-2 py-1.5 text-[12px] border border-[#e0e4ed] rounded-md focus:outline-none focus:border-[#0a1f44]" />
+            <span className="text-[#5a6478]">-</span>
+            <input type="number" placeholder="Max ₹" value={maxLoss} onChange={(e) => setMaxLoss(e.target.value)} className="w-20 px-2 py-1.5 text-[12px] border border-[#e0e4ed] rounded-md focus:outline-none focus:border-[#0a1f44]" />
+          </div>
+          {(from || to || cat || minLoss || maxLoss) && (
+            <button onClick={() => { setFrom(""); setTo(""); setCat(""); setMinLoss(""); setMaxLoss(""); setPreset("month"); }} className="text-[11px] text-[#8b0000] hover:underline">
               Clear
             </button>
           )}
