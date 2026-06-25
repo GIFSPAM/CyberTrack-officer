@@ -129,7 +129,7 @@ export function AppShell() {
             <div className="text-[13px] font-medium text-[#0a1f44] tabular-nums">
               {now ? now.toLocaleTimeString("en-IN", { hour12: false }) : ""}
             </div>
-            <div className="text-[11px] text-[#5a6478]">
+            <div className="text-[11px] text-[#5a6478] mb-1">
               {now
                 ? now.toLocaleDateString("en-IN", {
                     weekday: "short",
@@ -139,6 +139,15 @@ export function AppShell() {
                   })
                 : ""}
             </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem("auth");
+                window.location.href = "/login";
+              }}
+              className="text-[11px] font-medium text-[#8b0000] hover:underline"
+            >
+              Sign out
+            </button>
           </div>
         </header>
 

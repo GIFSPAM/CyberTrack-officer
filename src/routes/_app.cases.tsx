@@ -45,6 +45,7 @@ function AllCases() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [rating, setRating] = useState<number | null>(null);
+  const [moneyLossFilter, setMoneyLossFilter] = useState("");
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Inquiry | null>(null);
@@ -73,6 +74,10 @@ function AllCases() {
     if (from) list = list.filter((i) => new Date(i.created_at) >= new Date(from));
     if (to) list = list.filter((i) => new Date(i.created_at) <= new Date(to + "T23:59:59"));
     if (rating !== null) list = list.filter((i) => i.rating === rating);
+    if (moneyLossFilter === "low") list = list.filter((i) => i.money_lost !== null && i.money_lost < 10000);
+    else if (moneyLossFilter === "mid") list = list.filter((i) => i.money_lost !== null && i.money_lost >= 10000 && i.money_lost < 50000);
+    else if (moneyLossFilter === "high") list = list.filter((i) => i.money_lost !== null && i.money_lost >= 50000 && i.money_lost < 100000);
+    else if (moneyLossFilter === "severe") list = list.filter((i) => i.money_lost !== null && i.money_lost >= 100000);
 
     list = [...list];
     if (sort === "newest")
@@ -82,7 +87,7 @@ function AllCases() {
     else if (sort === "rating-high") list.sort((a, b) => b.rating - a.rating);
     else if (sort === "rating-low") list.sort((a, b) => a.rating - b.rating);
     return list;
-  }, [inquiriesQ.data, search, cat, loc, taluk, from, to, rating, sort]);
+  }, [inquiriesQ.data, search, cat, loc, taluk, from, to, rating, moneyLossFilter, sort]);
 
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
@@ -96,11 +101,12 @@ function AllCases() {
     setFrom("");
     setTo("");
     setRating(null);
+    setMoneyLossFilter("");
     setPage(1);
   };
 
   const exportCSV = () => {
-    const headers = ["Case ID", "Complainant", "Phone", "Category", "Location", "Taluk", "Rating", "Date"];
+    const headers = ["Case ID", "Complainant", "Phone", "Category", "Location", "Taluk", "Rating", "Money Lost", "Date"];
     const rows = filtered.map((i) => [
       i.id,
       i.complainant_name,
@@ -109,6 +115,7 @@ function AllCases() {
       i.locations?.name || "",
       i.locations?.taluk || "",
       i.rating,
+      i.money_lost || 0,
       format(new Date(i.created_at), "yyyy-MM-dd HH:mm"),
     ]);
     const csv = [headers, ...rows]
@@ -165,6 +172,13 @@ function AllCases() {
           </select>
           <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="px-2 py-2 text-[13px] border border-[#e0e4ed] rounded-md" />
           <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="px-2 py-2 text-[13px] border border-[#e0e4ed] rounded-md" />
+          <select value={moneyLossFilter} onChange={(e) => { setMoneyLossFilter(e.target.value); setPage(1); }} className="px-3 py-2 text-[13px] border border-[#e0e4ed] rounded-md">
+            <option value="">Any Amount</option>
+            <option value="low">&lt; ₹10,000</option>
+            <option value="mid">₹10K - ₹50K</option>
+            <option value="high">₹50K - ₹1L</option>
+            <option value="severe">&gt; ₹1L</option>
+          </select>
           <select value={sort} onChange={(e) => setSort(e.target.value)} className="px-3 py-2 text-[13px] border border-[#e0e4ed] rounded-md">
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
@@ -212,6 +226,7 @@ function AllCases() {
                   <th className="px-3 py-2.5 font-medium">Category</th>
                   <th className="px-3 py-2.5 font-medium">Location</th>
                   <th className="px-3 py-2.5 font-medium">Taluk</th>
+                  <th className="px-3 py-2.5 font-medium text-right">Loss (₹)</th>
                   <th className="px-3 py-2.5 font-medium">Rating</th>
                   <th className="px-3 py-2.5 font-medium">Date & Time</th>
                 </tr>
@@ -237,6 +252,9 @@ function AllCases() {
                       <td className="px-3 py-2.5">{i.categories?.name || "—"}</td>
                       <td className="px-3 py-2.5">{i.locations?.name || "—"}</td>
                       <td className="px-3 py-2.5 text-[#5a6478]">{i.locations?.taluk || "—"}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums font-medium text-[#c0392b]">
+                        {i.money_lost ? i.money_lost.toLocaleString("en-IN") : "—"}
+                      </td>
                       <td className="px-3 py-2.5">
                         <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${ratingBg}`}>
                           {i.rating}★

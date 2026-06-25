@@ -4,6 +4,9 @@
 -- Project: zjqsdmpwgqliexgnzwwm
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- 0. Add money_lost column
+ALTER TABLE public.inquiries ADD COLUMN IF NOT EXISTS money_lost numeric;
+
 -- 1. Make sure RLS is enabled on all tables
 ALTER TABLE categories  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inquiries   ENABLE ROW LEVEL SECURITY;

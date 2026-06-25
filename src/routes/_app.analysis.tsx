@@ -9,7 +9,7 @@ import {
   subDays, eachDayOfInterval,
 } from "date-fns";
 import { Download, TrendingUp, TrendingDown, Minus, Calendar } from "lucide-react";
-import { exportElementToPDF } from "@/lib/exportPDF";
+import { exportDataToPDF } from "@/lib/exportPDF";
 import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Cell,
@@ -174,9 +174,11 @@ function Analysis() {
   }, [filtered, prevPeriod, range]);
 
   const downloadPDF = async () => {
-    if (!reportRef.current) return;
     setExporting(true);
-    try { await exportElementToPDF(reportRef.current, `cyber-cell-report-${format(new Date(), "yyyy-MM-dd")}.pdf`); }
+    try { 
+      const rangeStr = `${format(range.start, "dd MMM yyyy")} - ${format(range.end, "dd MMM yyyy")}`;
+      exportDataToPDF(stats, rangeStr, `cyber-cell-report-${format(new Date(), "yyyy-MM-dd")}.pdf`); 
+    }
     finally { setExporting(false); }
   };
 

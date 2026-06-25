@@ -35,6 +35,7 @@ export type Inquiry = {
   complainant_phone: string;
   feedback: string;
   created_at: string;
+  money_lost: number | null;
   categories?: Category | null;
   locations?: Location | null;
 };
