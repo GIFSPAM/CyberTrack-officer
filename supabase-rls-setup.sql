@@ -48,7 +48,7 @@ CREATE TABLE public.officers (
 
 -- 6. Insert default admin account
 INSERT INTO public.officers (username, password) 
-VALUES ('CCPSP', '123456') 
+VALUES ('CCPSP', 'Admin@1234') 
 ON CONFLICT (username) DO NOTHING;
 
 -- 7. Ensure fallback seed values exist in tables
