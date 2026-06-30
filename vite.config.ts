@@ -11,7 +11,11 @@ export default defineConfig({
     tailwindcss(),
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
     tanstackStart({
-      server: { entry: "server" },
+      spa: { enabled: true },
+      server: { 
+        entry: "server",
+        preset: "github-pages"
+      },
     }),
     react(),
     nitro(),
