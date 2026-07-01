@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase, type Inquiry, type Category, type Location } from "@/lib/supabase";
+import { supabase, type Inquiry, type Category, type Location, getInquiries } from "@/lib/supabase";
 import { Skeleton, EmptyState } from "@/components/Skeleton";
 import { RatingStars } from "@/components/CaseDetailModal";
 import { format, startOfWeek, subDays } from "date-fns";
@@ -35,14 +35,7 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 function Feedback() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["inquiries", "all"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("inquiries")
-        .select("*, categories(*), locations(*)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data || []) as Inquiry[];
-    },
+    queryFn: getInquiries,
   });
 
   const categoriesQ = useQuery({
@@ -85,8 +78,12 @@ function Feedback() {
       count: all.filter((i) => i.rating === r).length,
     }));
     const max = Math.max(1, ...dist.map((d) => d.count));
-    const positive = total ? (all.filter((i) => i.rating >= 4).length / total) * 100 : 0;
-    const negative = total ? (all.filter((i) => i.rating <= 2).length / total) * 100 : 0;
+    const positive = total
+      ? (all.filter((i) => i.rating !== null && i.rating >= 4).length / total) * 100
+      : 0;
+    const negative = total
+      ? (all.filter((i) => i.rating !== null && i.rating <= 2).length / total) * 100
+      : 0;
     return { total, avg, dist, max, positive, negative };
   }, [all]);
 
@@ -99,8 +96,8 @@ function Feedback() {
     if (to) list = list.filter((i) => new Date(i.created_at) <= new Date(to + "T23:59:59"));
     list = [...list];
     if (sort === "newest") list.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
-    else if (sort === "high") list.sort((a, b) => b.rating - a.rating);
-    else if (sort === "low") list.sort((a, b) => a.rating - b.rating);
+    else if (sort === "high") list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    else if (sort === "low") list.sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0));
     return list;
   }, [withFeedback, ratingFilter, catFilter, locFilter, from, to, sort]);
 
@@ -195,7 +192,7 @@ function Feedback() {
             {summary.positive.toFixed(0)}%
           </div>
           <div className="text-[12px] text-[#5a6478] mt-1">
-            {all.filter((i) => i.rating >= 4).length} responses
+            {all.filter((i) => i.rating !== null && i.rating >= 4).length} responses
           </div>
         </div>
         <div className="card-surface p-5 flex flex-col justify-center">
@@ -204,7 +201,7 @@ function Feedback() {
             {summary.negative.toFixed(0)}%
           </div>
           <div className="text-[12px] text-[#5a6478] mt-1">
-            {all.filter((i) => i.rating <= 2).length} responses
+            {all.filter((i) => i.rating !== null && i.rating <= 2).length} responses
           </div>
         </div>
       </div>
@@ -313,7 +310,7 @@ function Feedback() {
                         : "—"}
                     </span>
                   </div>
-                  <RatingStars rating={f.rating} size={13} />
+                  <RatingStars rating={f.rating || 0} size={13} />
                 </div>
                 <p className="text-[13px] text-[#0d1b2a] leading-relaxed mb-3">
                   &ldquo;{show ? f.feedback : (f.feedback || "").slice(0, 180) + "..."}&rdquo;

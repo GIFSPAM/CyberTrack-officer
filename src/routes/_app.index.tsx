@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase, type Inquiry } from "@/lib/supabase";
+import { supabase, type Inquiry, getInquiries } from "@/lib/supabase";
 import { CaseDetailModal, maskPhone, RatingStars } from "@/components/CaseDetailModal";
 import { AddCaseModal } from "@/components/AddCaseModal";
 import { Skeleton, EmptyState } from "@/components/Skeleton";
@@ -37,14 +37,7 @@ export const Route = createFileRoute("/_app/")({
 function useInquiries() {
   return useQuery({
     queryKey: ["inquiries", "all"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("inquiries")
-        .select("*, categories(*), locations(*)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data || []) as Inquiry[];
-    },
+    queryFn: getInquiries,
     refetchInterval: 60_000,
   });
 }
@@ -205,7 +198,7 @@ function Dashboard() {
                         {format(new Date(i.created_at), "HH:mm")}
                       </td>
                       <td className="px-3 py-2.5">
-                        <RatingStars rating={i.rating} size={12} />
+                        <RatingStars rating={i.rating || 0} size={12} />
                       </td>
                     </tr>
                   ))}
@@ -267,7 +260,7 @@ function Dashboard() {
                     <span className="text-[13px] font-medium">
                       {f.complainant_name?.split(" ")[0] || "Anon"}
                     </span>
-                    <RatingStars rating={f.rating} size={11} />
+                    <RatingStars rating={f.rating || 0} size={11} />
                   </div>
                   <p className="text-[12px] text-[#5a6478] line-clamp-2">{f.feedback}</p>
                 </li>

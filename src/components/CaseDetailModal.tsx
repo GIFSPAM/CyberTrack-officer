@@ -59,7 +59,7 @@ export function CaseDetailModal({
                 inquiry.locations ? `${inquiry.locations.name}, ${inquiry.locations.taluk}` : "—"
               }
             />
-            <Field label="Complainant Name" value={inquiry.complainant_name} />
+            <Field label="Complainant Name" value={inquiry.complainant_name || "—"} />
             <Field label="Phone" value={inquiry.complainant_phone || "—"} />
             <Field
               label="Submitted At"

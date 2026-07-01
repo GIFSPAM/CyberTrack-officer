@@ -99,15 +99,29 @@ export function AddCaseModal({ isOpen, onClose, inquiryToEdit }: AddCaseModalPro
       };
 
       if (inquiryToEdit) {
-        const { error: updateError } = await supabase
-          .from("inquiries")
-          .update(payload)
-          .eq("id", inquiryToEdit.id);
+        const { error: updateError } = await supabase.rpc("update_inquiry", {
+          p_id: inquiryToEdit.id,
+          p_category_id: payload.category_id,
+          p_location_id: payload.location_id,
+          p_description: payload.description,
+          p_complainant_name: payload.complainant_name,
+          p_complainant_phone: payload.complainant_phone,
+          p_money_lost: payload.money_lost,
+          p_rating: payload.rating,
+          p_feedback: payload.feedback,
+        });
 
         if (updateError) throw updateError;
         toast.success("Case successfully updated!");
       } else {
-        const { error: insertError } = await supabase.from("inquiries").insert(payload);
+        const { data, error: insertError } = await supabase.rpc("create_inquiry", {
+          p_category_id: payload.category_id,
+          p_location_id: payload.location_id,
+          p_description: payload.description,
+          p_complainant_name: payload.complainant_name,
+          p_complainant_phone: payload.complainant_phone,
+          p_money_lost: payload.money_lost,
+        });
 
         if (insertError) throw insertError;
         toast.success("New case successfully registered!");
@@ -116,9 +130,9 @@ export function AddCaseModal({ isOpen, onClose, inquiryToEdit }: AddCaseModalPro
       qc.invalidateQueries({ queryKey: ["inquiries"] });
       resetForm();
       onClose();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message || "Failed to save the case.");
+      setError(err instanceof Error ? err.message : "Failed to save the case.");
     } finally {
       setIsSubmitting(false);
     }

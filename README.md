@@ -19,7 +19,7 @@ Internal monitoring and case registration dashboard for the Cybercrime Police St
 
 - **Streamlined Case Entry:** Officers can register complaints quickly. Complainant name and phone are optional (allowing anonymous case input). The Case ID is automatically generated.
 - **Cascading Category/Location Deletion:** Deleting a classification category or location automatically re-assigns existing cases to the default `"Other"` category/location (ID `1`), preventing database dependency conflicts.
-- **Filter-Aware CSV Exports:** Generate and download custom CSV spreadsheets of cases on both the *All Cases* and *Analysis* pages matching any active search, date, location, or amount filters.
+- **Filter-Aware CSV Exports:** Generate and download custom CSV spreadsheets of cases on both the _All Cases_ and _Analysis_ pages matching any active search, date, location, or amount filters.
 - **Analytical PDF Reports:** Generate clean, printable PDF summaries of station metrics and statistics.
 
 ---
@@ -27,6 +27,7 @@ Internal monitoring and case registration dashboard for the Cybercrime Police St
 ## Local Development
 
 ### 1. Configure Environment Variables
+
 Create a `.env.local` file in the root directory and add your Supabase credentials:
 
 ```bash
@@ -37,10 +38,12 @@ VITE_SUPABASE_SERVICE_KEY=your-service-secret-key
 ```
 
 ### 2. Install and Run
+
 ```bash
 npm install
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) to view the portal.
 
 ---
@@ -57,9 +60,10 @@ Run the SQL queries in `supabase-rls-setup.sql` within your **Supabase Dashboard
 
 ## GitHub Pages Static Hosting
 
-This project is configured to build as a static Single Page Application (SPA) for GitHub Pages. 
+This project is configured to build as a static Single Page Application (SPA) for GitHub Pages.
 
 ### 1. Build and Publish
+
 To manually build and deploy the application to your repository's `gh-pages` branch, execute the following command:
 
 ```bash
@@ -75,10 +79,12 @@ git push -f origin gh-pages
 ```
 
 ### 2. Configure GitHub Settings
+
 Once the files are pushed to the `gh-pages` branch:
+
 1. Open the repository on GitHub.
 2. Go to **Settings** (top tab).
-3. Select **Pages** (in the left sidebar under *Code and automation*).
+3. Select **Pages** (in the left sidebar under _Code and automation_).
 4. Under **Build and deployment** → **Source**, ensure **Deploy from a branch** is selected.
 5. Under **Branch**, select **`gh-pages`** and folder **`/ (root)`**.
 6. Click **Save**.

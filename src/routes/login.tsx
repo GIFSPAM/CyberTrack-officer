@@ -21,14 +21,12 @@ function Login() {
     setError("");
 
     try {
-      const { data, error: sbError } = await supabase
-        .from("officers")
-        .select("*")
-        .eq("username", username)
-        .eq("password", password)
-        .single();
+      const { data: isValid, error: sbError } = await supabase.rpc("verify_officer", {
+        p_username: username,
+        p_password: password,
+      });
 
-      if (data) {
+      if (isValid) {
         localStorage.setItem("auth", "true");
         router.navigate({ to: "/cases" });
       } else {

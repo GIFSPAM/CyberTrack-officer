@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase, type Inquiry, type Category, type Location } from "@/lib/supabase";
+import { supabase, type Inquiry, type Category, type Location, getInquiries } from "@/lib/supabase";
 import { CaseDetailModal, maskPhone, RatingStars } from "@/components/CaseDetailModal";
 import { AddCaseModal } from "@/components/AddCaseModal";
 import { Skeleton, EmptyState } from "@/components/Skeleton";
@@ -16,14 +16,7 @@ function AllCases() {
   const navigate = useNavigate();
   const inquiriesQ = useQuery({
     queryKey: ["inquiries", "all"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("inquiries")
-        .select("*, categories(*), locations(*)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data || []) as Inquiry[];
-    },
+    queryFn: getInquiries,
   });
   const categoriesQ = useQuery({
     queryKey: ["categories"],
@@ -88,8 +81,8 @@ function AllCases() {
     if (sort === "newest") list.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
     else if (sort === "oldest")
       list.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at));
-    else if (sort === "rating-high") list.sort((a, b) => b.rating - a.rating);
-    else if (sort === "rating-low") list.sort((a, b) => a.rating - b.rating);
+    else if (sort === "rating-high") list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    else if (sort === "rating-low") list.sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0));
     return list;
   }, [inquiriesQ.data, search, cat, loc, taluk, from, to, rating, minLoss, maxLoss, sort]);
 
@@ -323,12 +316,15 @@ function AllCases() {
               </thead>
               <tbody>
                 {pageData.map((i, idx) => {
+                  const ratingVal = i.rating;
                   const ratingBg =
-                    i.rating <= 2
-                      ? "bg-[#fdecea] text-[#c0392b]"
-                      : i.rating === 3
-                        ? "bg-[#fdf3e0] text-[#c47d00]"
-                        : "bg-[#e6f4ec] text-[#1a7a4a]";
+                    ratingVal === null || ratingVal === undefined
+                      ? "bg-[#f4f6f9] text-[#5a6478]"
+                      : ratingVal <= 2
+                        ? "bg-[#fdecea] text-[#c0392b]"
+                        : ratingVal === 3
+                          ? "bg-[#fdf3e0] text-[#c47d00]"
+                          : "bg-[#e6f4ec] text-[#1a7a4a]";
                   return (
                     <tr
                       key={i.id}
@@ -340,7 +336,9 @@ function AllCases() {
                       </td>
                       <td className="px-3 py-2.5 font-medium">#{i.id}</td>
                       <td className="px-3 py-2.5">{i.complainant_name}</td>
-                      <td className="px-3 py-2.5 tabular-nums">{maskPhone(i.complainant_phone)}</td>
+                      <td className="px-3 py-2.5 tabular-nums">
+                        {maskPhone(i.complainant_phone || "")}
+                      </td>
                       <td className="px-3 py-2.5">{i.categories?.name || "—"}</td>
                       <td className="px-3 py-2.5">{i.locations?.name || "—"}</td>
                       <td className="px-3 py-2.5 text-[#5a6478]">{i.locations?.taluk || "—"}</td>
@@ -351,7 +349,7 @@ function AllCases() {
                         <span
                           className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${ratingBg}`}
                         >
-                          {i.rating}★
+                          {i.rating !== null && i.rating !== undefined ? `${i.rating}★` : "—"}
                         </span>
                       </td>
                       <td className="px-3 py-2.5 tabular-nums text-[#5a6478]">

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase, type Inquiry, type Category } from "@/lib/supabase";
+import { supabase, type Inquiry, type Category, getInquiries } from "@/lib/supabase";
 import { Skeleton } from "@/components/Skeleton";
 import { colorFor } from "@/lib/colors";
 import {
@@ -84,14 +84,7 @@ function AnimatedNumber({
 function Analysis() {
   const { data, isLoading } = useQuery({
     queryKey: ["inquiries", "all"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("inquiries")
-        .select("*, categories(*), locations(*)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data || []) as Inquiry[];
-    },
+    queryFn: getInquiries,
   });
 
   const categoriesQ = useQuery({
@@ -201,7 +194,9 @@ function Analysis() {
       rating: `${r}★`,
       count: filtered.filter((i) => i.rating === r).length,
     }));
-    const satisfaction = total ? (filtered.filter((i) => i.rating >= 4).length / total) * 100 : 0;
+    const satisfaction = total
+      ? (filtered.filter((i) => i.rating !== null && i.rating >= 4).length / total) * 100
+      : 0;
 
     const dowNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const dow = dowNames.map((d) => ({ day: d, count: 0 }));

@@ -71,15 +71,22 @@ function NewCase() {
         feedback: feedback.trim() || null,
       };
 
-      const { error: insertError } = await supabase.from("inquiries").insert(payload);
+      const { data, error: insertError } = await supabase.rpc("create_inquiry", {
+        p_category_id: payload.category_id,
+        p_location_id: payload.location_id,
+        p_description: payload.description,
+        p_complainant_name: payload.complainant_name,
+        p_complainant_phone: payload.complainant_phone,
+        p_money_lost: payload.money_lost,
+      });
       if (insertError) throw insertError;
 
       toast.success("Case registered successfully!");
       qc.invalidateQueries({ queryKey: ["inquiries"] });
       navigate({ to: "/cases" });
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message || "Failed to save the case.");
+      setError(err instanceof Error ? err.message : "Failed to save the case.");
     } finally {
       setIsSubmitting(false);
     }

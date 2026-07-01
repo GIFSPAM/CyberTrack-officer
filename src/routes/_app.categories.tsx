@@ -24,7 +24,8 @@ function Categories() {
   const inqQ = useQuery({
     queryKey: ["inquiries", "all"],
     queryFn: async () => {
-      const { data } = await supabase.from("inquiries").select("id, category_id");
+      const { data, error } = await supabase.rpc("get_all_inquiries");
+      if (error) throw error;
       return (data || []) as Pick<Inquiry, "id" | "category_id">[];
     },
   });

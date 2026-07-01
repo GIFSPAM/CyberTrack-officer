@@ -12,9 +12,8 @@ export default defineConfig({
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
     tanstackStart({
       spa: { enabled: true },
-      server: { 
+      server: {
         entry: "server",
-        preset: "github-pages"
       },
     }),
     react(),

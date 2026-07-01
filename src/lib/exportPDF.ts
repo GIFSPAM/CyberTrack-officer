@@ -52,7 +52,17 @@ export async function exportElementToPDF(
   pdf.save(filename);
 }
 
-export function exportDataToPDF(stats: any, rangeStr: string, filename = "report.pdf") {
+interface PdfStats {
+  total: number;
+  avgRating: number;
+  satisfaction: number;
+  topCat: string;
+  topLoc: string;
+  categories: { name: string; count: number; pct: number }[];
+  locations: { name: string; count: number }[];
+}
+
+export function exportDataToPDF(stats: PdfStats, rangeStr: string, filename = "report.pdf") {
   const pdf = new jsPDF("p", "mm", "a4");
 
   pdf.setFontSize(16);
@@ -87,7 +97,7 @@ export function exportDataToPDF(stats: any, rangeStr: string, filename = "report
   pdf.setFontSize(10);
   pdf.setTextColor(50, 60, 80);
   let y = 124;
-  stats.categories.slice(0, 15).forEach((c: any) => {
+  stats.categories.slice(0, 15).forEach((c) => {
     pdf.text(`${c.name}`, 14, y);
     pdf.text(`${c.count} cases (${c.pct.toFixed(1)}%)`, 140, y);
     y += 8;
@@ -106,14 +116,14 @@ export function exportDataToPDF(stats: any, rangeStr: string, filename = "report
     y += 10;
     pdf.setFontSize(10);
     pdf.setTextColor(50, 60, 80);
-    stats.locations.slice(0, 10).forEach((l: any) => {
+    stats.locations.slice(0, 10).forEach((l) => {
       pdf.text(`${l.name}`, 14, y);
       pdf.text(`${l.count} cases`, 140, y);
       y += 8;
     });
   }
 
-  const pageCount = (pdf as any).internal.getNumberOfPages();
+  const pageCount = (pdf as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     pdf.setPage(i);
     pdf.setFontSize(8);
